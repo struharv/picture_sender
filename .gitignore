@@ -1,0 +1,5 @@
+/cmake-build-debug/
+/src/client
+/src/server
+/src/client
+/CMakeLists.txt

@@ -71,7 +71,7 @@ void cut_image(Mat img, int pos_x, int pos_y, int width, int height, unsigned ch
                 bgrPixel.val[2] = pixelPtr[real_y * img.cols * cn + real_x * cn + 2]; // R
             }
             //cout << int(bgrPixel.val[0]) << " " << int(bgrPixel.val[0]) << " " << int(bgrPixel.val[0]) << "\n";
-            buf[cnt++] = (char) bgrPixel.val[0];
+            buf[cnt++] = (char) ((bgrPixel.val[0]+bgrPixel.val[1]+bgrPixel.val[2])/3);
         }
     }
 }
@@ -100,17 +100,6 @@ int main() {
     cout << "hello\n";
     send_image("../data/panda_300_300.png", 1);
 
-
-    /*cut_image(0, 0, SQUARE_SIZE, SQUARE_SIZE, data);
-    for (int i = 0; i < SQUARE_SIZE*SQUARE_SIZE; i++) {
-        cout << ((int)data[i]) << " ";
-    }
-
-    send(data, SQUARE_SIZE*SQUARE_SIZE);*/
-
-    /*for(int i = 0; i < 10; i++) {
-        send(data, 3);
-    }*/
 
     return 0;
 }
