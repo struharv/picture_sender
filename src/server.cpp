@@ -87,7 +87,7 @@ int main() {
 
         printf("size: %d (cnt: %d) id:%d seq: %d (x=%d y=%d)\n", n, cnt++, buffer[0], seq, x, y);
 
-        imwrite("../out_data/some.png", img);
+        imwrite("../out_data/result.png", img);
     }
     return 0;
 }
