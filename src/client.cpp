@@ -19,7 +19,13 @@
 using namespace std;
 using namespace cv;
 
-void send(unsigned char *values, int values_len) {
+char const * server_address = "127.0.0.1";
+/**
+ *
+ * @param values
+ * @param values_len
+ */
+void send_image_region(unsigned char *values, int values_len) {
     int sockfd;
     char buffer[MAXLINE];
     struct sockaddr_in servaddr;
@@ -35,7 +41,7 @@ void send(unsigned char *values, int values_len) {
     // Filling server information
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    servaddr.sin_addr.s_addr = inet_addr(server_address);
 
     int n;
     socklen_t len;
@@ -47,12 +53,11 @@ void send(unsigned char *values, int values_len) {
     close(sockfd);
 }
 
-void cut_image(Mat img, int pos_x, int pos_y, int width, int height, unsigned char *buf, int buf_start) {
-    uint8_t *pixelPtr = (uint8_t *) img.data;
+void split_image(Mat img, int pos_x, int pos_y, int width, int height, unsigned char *buf, int buf_start) {
+    auto *pixelPtr = (uint8_t *) img.data;
     int cn = img.channels();
     Scalar_<uint8_t> bgrPixel;
 
-    //img.rows, img.cols
     int cnt = buf_start;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -60,17 +65,16 @@ void cut_image(Mat img, int pos_x, int pos_y, int width, int height, unsigned ch
             int real_y = y + pos_y*SQUARE_SIZE;
 
             if (real_y >= img.rows || real_x >= img.cols) {
+                // outside the region
                 bgrPixel.val[0] = 0;
                 bgrPixel.val[1] = 0;
                 bgrPixel.val[2] = 0;
-
             } else {
-
                 bgrPixel.val[0] = pixelPtr[real_y * img.cols * cn + real_x * cn + 0]; // B
                 bgrPixel.val[1] = pixelPtr[real_y * img.cols * cn + real_x * cn + 1]; // G
                 bgrPixel.val[2] = pixelPtr[real_y * img.cols * cn + real_x * cn + 2]; // R
             }
-            //cout << int(bgrPixel.val[0]) << " " << int(bgrPixel.val[0]) << " " << int(bgrPixel.val[0]) << "\n";
+
             buf[cnt++] = (char) ((bgrPixel.val[0]+bgrPixel.val[1]+bgrPixel.val[2])/3);
         }
     }
@@ -85,21 +89,18 @@ void send_image(string filename, unsigned char img_id) {
             printf("sending %d %d\n", x, y);
             unsigned char data[SQUARE_SIZE * SQUARE_SIZE + IMG_ID + SEQ_ID];
 
-            cut_image(img, x, y, SQUARE_SIZE, SQUARE_SIZE, data, IMG_ID + SEQ_ID);
+            split_image(img, x, y, SQUARE_SIZE, SQUARE_SIZE, data, IMG_ID + SEQ_ID);
             data[1] = seq / 256;
             data[2] = seq % 256;
 
-            send(data, SQUARE_SIZE*SQUARE_SIZE);
+            send_image_region(data, SQUARE_SIZE * SQUARE_SIZE);
             seq++;
         }
-
     }
 }
 
 int main() {
-    cout << "hello\n";
     send_image("../data/panda_300_300.png", 1);
-
 
     return 0;
 }

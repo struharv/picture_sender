@@ -23,12 +23,8 @@
 #define IMG_ID 1
 #define SEQ_ID 2
 
-
-
 using namespace std;
 using namespace cv;
-
-
 
 int main() {
     int sockfd;
@@ -67,24 +63,13 @@ int main() {
     uint8_t *pixelPtr = (uint8_t *) img.data;
     int cn = img.channels();
     Scalar_<uint8_t> bgrPixel;
-    //print("img.channels: %d\n")
 
-    for(int y = 0; y < IMAGE_HEIGHT; y++) {
-        for (int x = 0; x < IMAGE_WIDTH; x++) {
-            pixelPtr[y * img.cols * cn + x * cn + 0] = 255;
-            pixelPtr[y * img.cols * cn + x * cn + 1] = 255;
-            pixelPtr[y * img.cols * cn + x * cn + 2] = 255;
-
-        }
-    }
-    imshow("Image", img);
-    imwrite("../out_data/some.png", img);
     while (true) {
 
         n = recvfrom(sockfd, (char *) buffer, MAXLINE,
                      MSG_WAITALL, (struct sockaddr *) &cliaddr,
                      &len);
-        //buffer[n] = '\0';
+
         int seq = buffer[1]*256 + buffer[2];
 
         int x = (seq * SQUARE_SIZE) % IMAGE_WIDTH;
@@ -98,15 +83,11 @@ int main() {
             pixelPtr[real_y * img.cols * cn + real_x * cn + 0] = buffer[i];
             pixelPtr[real_y * img.cols * cn + real_x * cn + 1] = buffer[i];
             pixelPtr[real_y * img.cols * cn + real_x * cn + 2] = buffer[i];
-
-
         }
 
-        printf("size: %d (%d) %d %d (x=%d y=%d)\n", n, cnt++, buffer[0], seq, x, y);
+        printf("size: %d (cnt: %d) id:%d seq: %d (x=%d y=%d)\n", n, cnt++, buffer[0], seq, x, y);
 
-        imshow("Image", img);
         imwrite("../out_data/some.png", img);
-
     }
     return 0;
 }
